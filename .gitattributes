@@ -1,0 +1,6 @@
+# Exclude vendored third-party sources from GitHub's language statistics.
+# These directories ship as vendored source so reviewers can rebuild the
+# hardware simulators, but they are not part of our contribution.
+
+hardware/ramulator/src_build/**  linguist-vendored
+hardware/sim/mem/cacti/**        linguist-vendored

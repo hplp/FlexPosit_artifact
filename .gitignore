@@ -1,0 +1,25 @@
+# Reviewer-produced runtime state
+results/
+ae_work/
+quant_out_*/
+logs/
+
+# HuggingFace cache
+hf_cache/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Editor / OS
+.DS_Store
+*.swp
+.vscode/
+.idea/
+
+# Slurm outputs (only relevant on the maintainer's cluster)
+slurm-*.out
+slurm-*.err
