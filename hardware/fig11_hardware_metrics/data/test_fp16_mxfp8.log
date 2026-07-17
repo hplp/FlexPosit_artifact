@@ -1,0 +1,210 @@
+Accelerator: FP16-MXFP8 (FP16 act x MXFP8 weight)
+PE Array Dimension: [9, 16]
+Input Precision: 16-bit, Weight Precision: 8-bit (MXFP8)
+Context Length: 256, Generation Mode: True
+Models to test: 9
+pe_energy: 0.3786  (estimated 0.73x FP16; table gives area only)
+pe_area: 768.0
+
+[1/9] Model: gpt2-large
+  Total Cycle:        7,268,608
+  PE Array Area:      0.110592 mm²
+  Weight Buffer:      0.459849 mm²
+  Input Buffer:       0.485785 mm²
+  Total Area:         1.056226 mm²
+  DRAM Energy:        683.75 uJ
+  On-chip Energy:     976.87 uJ
+  Total Energy:       1660.63 uJ
+  Total Ops:          18.00 GOPS
+  Total Power:        228.47 mW
+  Total GOps per Power: 78.81 GOPS/W
+  Energy Delay Product: 12070450061.85
+  Bottleneck Analysis:
+    Total Layers:         73
+    Memory-bound Layers:  0 (0.0%)
+    Compute-bound Layers: 73 (100.0%)
+  Latency Contribution:
+    Total Latency:        7,268,608 cycles
+    From Compute-bound:   7,268,608 cycles (100.0%)
+    From Memory-bound:    0 cycles (0.0%)
+
+[2/9] Model: gpt2-xl
+  Total Cycle:        9,158,144
+  PE Array Area:      0.110592 mm²
+  Weight Buffer:      0.459849 mm²
+  Input Buffer:       0.485785 mm²
+  Total Area:         1.056226 mm²
+  DRAM Energy:        869.60 uJ
+  On-chip Energy:     1227.08 uJ
+  Total Energy:       2096.68 uJ
+  Total Ops:          18.05 GOPS
+  Total Power:        228.94 mW
+  Total GOps per Power: 78.83 GOPS/W
+  Energy Delay Product: 19201727558.53
+  Bottleneck Analysis:
+    Total Layers:         97
+    Memory-bound Layers:  48 (49.5%)
+    Compute-bound Layers: 49 (50.5%)
+  Latency Contribution:
+    Total Latency:        9,158,144 cycles
+    From Compute-bound:   8,972,864 cycles (98.0%)
+    From Memory-bound:    185,280 cycles (2.0%)
+
+[3/9] Model: microsoft/phi-2
+  Total Cycle:        294,853,568
+  PE Array Area:      0.110592 mm²
+  Weight Buffer:      0.459849 mm²
+  Input Buffer:       0.485785 mm²
+  Total Area:         1.056226 mm²
+  DRAM Energy:        27391.43 uJ
+  On-chip Energy:     39608.05 uJ
+  Total Energy:       66999.48 uJ
+  Total Ops:          17.98 GOPS
+  Total Power:        227.23 mW
+  Total GOps per Power: 79.12 GOPS/W
+  Energy Delay Product: 19755036366031.76
+  Bottleneck Analysis:
+    Total Layers:         257
+    Memory-bound Layers:  32 (12.5%)
+    Compute-bound Layers: 225 (87.5%)
+  Latency Contribution:
+    Total Latency:        294,853,568 cycles
+    From Compute-bound:   294,599,168 cycles (99.9%)
+    From Memory-bound:    254,400 cycles (0.1%)
+
+[4/9] Model: facebook/opt-2.7b
+  Total Cycle:        294,589,888
+  PE Array Area:      0.110592 mm²
+  Weight Buffer:      0.459849 mm²
+  Input Buffer:       0.485785 mm²
+  Total Area:         1.056226 mm²
+  DRAM Energy:        27366.70 uJ
+  On-chip Energy:     39572.62 uJ
+  Total Energy:       66939.32 uJ
+  Total Ops:          17.98 GOPS
+  Total Power:        227.23 mW
+  Total GOps per Power: 79.12 GOPS/W
+  Energy Delay Product: 19719646973502.07
+  Bottleneck Analysis:
+    Total Layers:         257
+    Memory-bound Layers:  32 (12.5%)
+    Compute-bound Layers: 225 (87.5%)
+  Latency Contribution:
+    Total Latency:        294,589,888 cycles
+    From Compute-bound:   294,335,488 cycles (99.9%)
+    From Memory-bound:    254,400 cycles (0.1%)
+
+[5/9] Model: meta-llama/Llama-2-7b-hf
+  Total Cycle:        735,598,912
+  PE Array Area:      0.110592 mm²
+  Weight Buffer:      0.459849 mm²
+  Input Buffer:       0.485785 mm²
+  Total Area:         1.056226 mm²
+  DRAM Energy:        68425.14 uJ
+  On-chip Energy:     98818.35 uJ
+  Total Energy:       167243.49 uJ
+  Total Ops:          17.98 GOPS
+  Total Power:        227.36 mW
+  Total GOps per Power: 79.06 GOPS/W
+  Energy Delay Product: 123024131278607.48
+  Bottleneck Analysis:
+    Total Layers:         289
+    Memory-bound Layers:  64 (22.1%)
+    Compute-bound Layers: 225 (77.9%)
+  Latency Contribution:
+    Total Latency:        735,598,912 cycles
+    From Compute-bound:   735,133,696 cycles (99.9%)
+    From Memory-bound:    465,216 cycles (0.1%)
+
+[6/9] Model: Qwen/Qwen2.5-7B
+  Total Cycle:        786,429,952
+  PE Array Area:      0.110592 mm²
+  Weight Buffer:      0.459849 mm²
+  Input Buffer:       0.485785 mm²
+  Total Area:         1.056226 mm²
+  DRAM Energy:        73147.83 uJ
+  On-chip Energy:     105672.10 uJ
+  Total Energy:       178819.93 uJ
+  Total Ops:          16.81 GOPS
+  Total Power:        227.38 mW
+  Total GOps per Power: 73.95 GOPS/W
+  Energy Delay Product: 140629349361726.16
+  Bottleneck Analysis:
+    Total Layers:         253
+    Memory-bound Layers:  0 (0.0%)
+    Compute-bound Layers: 253 (100.0%)
+  Latency Contribution:
+    Total Latency:        786,429,952 cycles
+    From Compute-bound:   786,429,952 cycles (100.0%)
+    From Memory-bound:    0 cycles (0.0%)
+
+[7/9] Model: mistralai/Mistral-7B-v0.1
+  Total Cycle:        791,068,672
+  PE Array Area:      0.110592 mm²
+  Weight Buffer:      0.459849 mm²
+  Input Buffer:       0.485785 mm²
+  Total Area:         1.056226 mm²
+  DRAM Energy:        73526.44 uJ
+  On-chip Energy:     106294.45 uJ
+  Total Energy:       179820.90 uJ
+  Total Ops:          16.72 GOPS
+  Total Power:        227.31 mW
+  Total GOps per Power: 73.53 GOPS/W
+  Energy Delay Product: 142250676976215.44
+  Bottleneck Analysis:
+    Total Layers:         289
+    Memory-bound Layers:  0 (0.0%)
+    Compute-bound Layers: 289 (100.0%)
+  Latency Contribution:
+    Total Latency:        791,068,672 cycles
+    From Compute-bound:   791,068,672 cycles (100.0%)
+    From Memory-bound:    0 cycles (0.0%)
+
+[8/9] Model: deepseek-ai/deepseek-llm-7b-base
+  Total Cycle:        722,573,228
+  PE Array Area:      0.110592 mm²
+  Weight Buffer:      0.459849 mm²
+  Input Buffer:       0.485785 mm²
+  Total Area:         1.056226 mm²
+  DRAM Energy:        67217.17 uJ
+  On-chip Energy:     97069.85 uJ
+  Total Energy:       164287.02 uJ
+  Total Ops:          18.30 GOPS
+  Total Power:        227.36 mW
+  Total GOps per Power: 80.49 GOPS/W
+  Energy Delay Product: 118709402996454.64
+  Bottleneck Analysis:
+    Total Layers:         271
+    Memory-bound Layers:  60 (22.1%)
+    Compute-bound Layers: 211 (77.9%)
+  Latency Contribution:
+    Total Latency:        722,573,228 cycles
+    From Compute-bound:   722,137,088 cycles (99.9%)
+    From Memory-bound:    436,140 cycles (0.1%)
+
+[9/9] Model: Qwen/Qwen2.5-14B
+  Total Cycle:        1,555,550,208
+  PE Array Area:      0.110592 mm²
+  Weight Buffer:      0.459849 mm²
+  Input Buffer:       0.485785 mm²
+  Total Area:         1.056226 mm²
+  DRAM Energy:        144711.97 uJ
+  On-chip Energy:     209024.84 uJ
+  Total Energy:       353736.82 uJ
+  Total Ops:          17.00 GOPS
+  Total Power:        227.40 mW
+  Total GOps per Power: 74.76 GOPS/W
+  Energy Delay Product: 550255379979291.06
+  Bottleneck Analysis:
+    Total Layers:         433
+    Memory-bound Layers:  0 (0.0%)
+    Compute-bound Layers: 433 (100.0%)
+  Latency Contribution:
+    Total Latency:        1,555,550,208 cycles
+    From Compute-bound:   1,555,550,208 cycles (100.0%)
+    From Memory-bound:    0 cycles (0.0%)
+
+
+Summary:
+Latency (cycles): [7268608, 9158144, 294853568, 294589888, 735598912, 786429952, 791068672, 722573228, 1555550208]
+Energy [On-chip, Total] (uJ): [[977, 1661], [1227, 2097], [39608, 66999], [39573, 66939], [98818, 167243], [105672, 178820], [106294, 179821], [97070, 164287], [209025, 353737]]

@@ -1,0 +1,6 @@
+Ramulator 2 is licensed under the MIT License.
+
+Source repository:  https://github.com/CMU-SAFARI/ramulator2
+License text:       https://github.com/CMU-SAFARI/ramulator2/blob/main/LICENSE
+
+For attribution and citation, see NOTICE.md at the repository root.

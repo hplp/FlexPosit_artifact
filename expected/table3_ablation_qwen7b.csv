@@ -1,0 +1,7 @@
+method,label,target_avg_bits,wikitext2_ppl
+int4,INT4 (per-channel range),4.0,11.87
+posit41,"Posit(4,1) (per-channel)",4.0,8.39
+mpq_random,MPQ (random),4.1,8.25
+mpq_location,MPQ (location),4.1,8.36
+mpq_fisher,MPQ (Fisher-ranked),4.1,7.92
+mpq_flexposit,MPQ (FlexPosit),4.1,7.76

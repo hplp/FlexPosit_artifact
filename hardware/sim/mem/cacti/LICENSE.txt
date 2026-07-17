@@ -1,0 +1,6 @@
+CACTI 7 is distributed under HP Labs' modified-BSD license.
+
+Source repository:  https://github.com/HewlettPackard/cacti
+License text:       https://github.com/HewlettPackard/cacti/blob/master/LICENSE
+
+For attribution and citation, see NOTICE.md at the repository root.

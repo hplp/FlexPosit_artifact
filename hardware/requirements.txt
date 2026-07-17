@@ -1,0 +1,4 @@
+# Python dependencies to reproduce Figures 11 & 12.
+# The analytical simulator (sim/) and both plotters need only these two packages.
+numpy
+matplotlib
