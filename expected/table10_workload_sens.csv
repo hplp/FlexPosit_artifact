@@ -1,0 +1,5 @@
+batch_size,context_length,speedup_vs_FP16,speedup_vs_BitMoD,speedup_vs_OliVe,energy_reduction_vs_FP16,energy_reduction_vs_BitMoD,energy_reduction_vs_OliVe
+1,256,4.1,1.8,1.5,4.0,1.2,2.0
+1,8192,4.0,1.8,1.4,3.9,1.2,2.0
+4,4096,3.8,1.7,1.4,3.7,1.2,1.9
+8,8192,3.4,1.6,1.2,3.5,1.2,1.8
