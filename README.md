@@ -2,17 +2,20 @@
 
 See the paper's Artifact Appendix for the full description. This README is a quick reference.
 
+Archived snapshot: [v1.4 on Zenodo](https://doi.org/10.5281/zenodo.21514788)
+(concept DOI [10.5281/zenodo.21434916](https://doi.org/10.5281/zenodo.21434916) always resolves to the latest version).
+
 ## Reproduce
 
 ```bash
 export HF_TOKEN=hf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx   # required for gated Llama-2
 
 bash 01_install.sh              # ~20 min
-bash 02_headline_ppl.sh         # Table 2       12-16 h
+bash 02_headline_ppl.sh         # Table 2       13-17 h
 bash 03_ablation.sh             # Table 3       1 h
-bash 04_mpq_granularity.sh      # Table 4       10 s
-bash 05_hardware.sh             # Figures 11-12, Table 10  2 h
-bash 06_act_quant.sh            # Table 6       0.5-1.5 h
+bash 04_mpq_granularity.sh      # Table 4       1 min
+bash 05_hardware.sh             # Figures 11-12, Table 10  ~2 h
+bash 06_act_quant.sh            # Table 6       0.5-1 h
 ```
 
 Each script writes its CSV to `results/` and ends with a `verify.py` diff against `expected/` (±0.1 PPL tolerance).
