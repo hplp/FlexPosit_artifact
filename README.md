@@ -2,9 +2,6 @@
 
 See the paper's Artifact Appendix for the full description. This README is a quick reference.
 
-Archived snapshot: [v1.4 on Zenodo](https://doi.org/10.5281/zenodo.21514788)
-(concept DOI [10.5281/zenodo.21434916](https://doi.org/10.5281/zenodo.21434916) always resolves to the latest version).
-
 ## Reproduce
 
 ```bash
