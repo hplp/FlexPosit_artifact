@@ -31,38 +31,6 @@ command -v conda >/dev/null || { echo "ERROR: conda not on PATH"; exit 1; }
 command -v nvidia-smi >/dev/null || { echo "ERROR: nvidia-smi not found"; exit 1; }
 nvidia-smi -L
 
-# --- nvcc / GPU-arch check (warn only) ---
-# PyTorch's cpp_extension JIT-compiles qtorch_plus CUDA kernels for the local
-# GPU on first import. The nvcc that gets invoked must support the local GPU's
-# compute capability (CUDA >= 11.8 for Ada compute_89, >= 12.0 for Hopper
-# compute_90, >= 12.8 for Blackwell compute_100). If the nvcc on PATH is too
-# old, warn the reviewer and point at CUDA_HOME as the fix; do not override.
-GPU_CC="$(nvidia-smi --query-gpu=compute_cap --format=csv,noheader 2>/dev/null \
-          | head -n1 | tr -d '. ')"
-if [[ -n "$GPU_CC" ]]; then
-  NVCC_ON_PATH="$(command -v nvcc || true)"
-  nvcc_ok=1
-  if [[ -z "$NVCC_ON_PATH" ]]; then
-    nvcc_ok=0
-  elif ! "$NVCC_ON_PATH" --list-gpu-arch 2>/dev/null | grep -qx "compute_$GPU_CC"; then
-    # Fallback for old nvcc without --list-gpu-arch: try a trivial compile.
-    if ! echo "" | "$NVCC_ON_PATH" -x cu -arch=sm_$GPU_CC -ptx -o /dev/null - 2>/dev/null; then
-      nvcc_ok=0
-    fi
-  fi
-  if [[ "$nvcc_ok" != "1" ]]; then
-    echo "[warn] nvcc on PATH (${NVCC_ON_PATH:-none}) does not appear to support"
-    echo "[warn] your GPU's compute capability ${GPU_CC:0:1}.${GPU_CC:1:1}."
-    echo "[warn] qtorch_plus's JIT extension build will fail (nvcc fatal:"
-    echo "[warn] Unsupported gpu architecture 'compute_$GPU_CC')."
-    echo "[warn] Fix: export CUDA_HOME=/path/to/newer/cuda and PATH=\$CUDA_HOME/bin:\$PATH"
-    echo "[warn] before re-running 01_install.sh. Required minimums:"
-    echo "[warn]   Ada (8.9)      -> CUDA >= 11.8"
-    echo "[warn]   Hopper (9.0)   -> CUDA >= 12.0"
-    echo "[warn]   Blackwell (10) -> CUDA >= 12.8"
-  fi
-fi
-
 # --- Conda env ---
 source "$(conda info --base)/etc/profile.d/conda.sh"
 if conda env list | awk '{print $1}' | grep -qx "$ENV_NAME"; then
