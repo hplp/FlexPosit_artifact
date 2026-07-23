@@ -7,11 +7,11 @@ See the paper's Artifact Appendix for the full description. This README is a qui
 ```bash
 export HF_TOKEN=hf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx   # required for gated Llama-2
 
-bash 01_install.sh              # ~20 min
+bash 01_install.sh              # ~40 min
 bash 02_headline_ppl.sh         # Table 2       13-17 h
 bash 03_ablation.sh             # Table 3       1 h
 bash 04_mpq_granularity.sh      # Table 4       1 min
-bash 05_hardware.sh             # Figures 11-12, Table 10  ~2 h
+bash 05_hardware.sh             # Figures 11-12, Table 10  ~2-3 h
 bash 06_act_quant.sh            # Table 6       0.5-1 h
 ```
 
