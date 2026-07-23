@@ -108,8 +108,16 @@ echo "Build CACTI from source"
 echo "==========================================================="
 CACTI_DIR="$REPO_ROOT/hardware/sim/mem/cacti"
 CACTI_LOG="$CACTI_DIR/build.log"
+# Modern Ubuntu (>=22.04) / WSL toolchains default to -pie at link time, but
+# CACTI's Makefile doesn't compile objects with -fPIE, so ld fails with
+# "failed to set dynamic section sizes: bad value". Pass -no-pie via CXX/CC
+# to disable PIE at link. No-op on older toolchains where PIE isn't default.
+CACTI_CXX="g++ -m64 -no-pie"
+CACTI_CC="gcc -m64 -no-pie"
 if [[ -d "$CACTI_DIR/src" ]]; then
-  if ( cd "$CACTI_DIR/src" && make -j4 >"$CACTI_LOG" 2>&1 ); then
+  if ( cd "$CACTI_DIR/src" && \
+       { make clean >/dev/null 2>&1 || true; } && \
+       make -j4 CXX="$CACTI_CXX" CC="$CACTI_CC" >"$CACTI_LOG" 2>&1 ); then
     cp -f "$CACTI_DIR/src/cacti" "$CACTI_DIR/cacti"
     rm -f "$CACTI_LOG"
     echo "[cacti] Built from source (host glibc) and installed to $CACTI_DIR/cacti"
