@@ -24,3 +24,6 @@ venv/
 slurm-*.out
 slurm-*.err
 src_build/build_ae/
+
+# Install-time build log (only present when the source build fails)
+hardware/sim/mem/cacti/build.log

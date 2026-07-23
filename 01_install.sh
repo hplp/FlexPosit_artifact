@@ -107,15 +107,33 @@ echo "==========================================================="
 echo "Build CACTI from source"
 echo "==========================================================="
 CACTI_DIR="$REPO_ROOT/hardware/sim/mem/cacti"
+CACTI_LOG="$CACTI_DIR/build.log"
 if [[ -d "$CACTI_DIR/src" ]]; then
-  if ( cd "$CACTI_DIR/src" && make -j4 >/dev/null 2>&1 ); then
+  if ( cd "$CACTI_DIR/src" && make -j4 >"$CACTI_LOG" 2>&1 ); then
     cp -f "$CACTI_DIR/src/cacti" "$CACTI_DIR/cacti"
+    rm -f "$CACTI_LOG"
     echo "[cacti] Built from source (host glibc) and installed to $CACTI_DIR/cacti"
   else
-    echo "[cacti] WARN: build failed; keeping the bundled binary (may fail on older glibc)"
+    echo "[cacti] WARN: build failed; keeping the bundled binary."
+    echo "[cacti]       See build log: $CACTI_LOG"
+    echo "[cacti]       Last error lines:"
+    tail -n 5 "$CACTI_LOG" 2>/dev/null | sed 's/^/[cacti]         /'
   fi
 else
   echo "[cacti] No src/ directory found; keeping the bundled binary"
+fi
+
+# Smoke-test: does the cacti binary actually load on this host?
+# glibc/libstdc++ loader failures fire before main() runs, so any invocation
+# surfaces them on stderr. Timeout in case cacti runs a default simulation.
+if [[ -x "$CACTI_DIR/cacti" ]]; then
+  cacti_err="$(timeout 5 "$CACTI_DIR/cacti" </dev/null 2>&1 || true)"
+  if echo "$cacti_err" | grep -qE 'GLIBC(XX)?_[0-9.]+.* not found'; then
+    echo "[cacti] WARN: cacti binary fails to load on this host:"
+    echo "$cacti_err" | grep -m1 -E 'GLIBC(XX)?_' | sed 's/^/[cacti]         /'
+    echo "[cacti]       05_hardware.sh's Table 10 regeneration will fail."
+    echo "[cacti]       Fix: rebuild cacti against this host's glibc, or use a newer host."
+  fi
 fi
 
 # --- Build Ramulator2 from source ---
