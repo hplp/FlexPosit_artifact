@@ -48,7 +48,7 @@ conda activate "$ENV_NAME"
 export PYTHONUNBUFFERED=1
 
 # --- Preflight: gated Llama-2 needs either HF_TOKEN (online), a warm offline cache, or SKIP_LLAMA2=1 ---
-# Bail before starting the 6-13 h sweep rather than 30 s into it.
+# Bail before starting the 13-17 h sweep rather than 30 s into it.
 if [[ "${SKIP_LLAMA2:-0}" != "1" ]] && [[ "${HF_HUB_OFFLINE:-0}" != "1" ]] && [[ -z "${HF_TOKEN:-}" ]]; then
   cat >&2 <<EOF
 ================================================================================
@@ -62,7 +62,7 @@ if [[ "${SKIP_LLAMA2:-0}" != "1" ]] && [[ "${HF_HUB_OFFLINE:-0}" != "1" ]] && [[
     export SKIP_LLAMA2=1                                     # skip llama-2-7b entirely
 
   See the "HuggingFace model access" section in README.md.
-  Aborting before the 6-13 h sweep.
+  Aborting before the 13-17 h sweep.
 ================================================================================
 EOF
   exit 2

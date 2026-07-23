@@ -11,13 +11,14 @@
 # Two reproduction levels:
 #   DEFAULT: replots Figures 11 + 12 from shipped data (seconds), and runs the
 #            bundled analytical simulator over 20 workload configs to regenerate
-#            Table 10 from scratch and verify against expected/ (~15-20 min CPU).
+#            Table 10 from scratch and verify against expected/ (~2 h CPU).
 #   FULL="1" mode: also regenerates Figure 11's 5 accelerator logs via the
-#            simulator, then replots. Total ~20-30 min CPU.
-#   Requires glibc >= 2.34 (Ubuntu 22.04+ / RHEL 9+) for the simulator.
+#            simulator, then replots. Total ~2.5 h CPU.
+#   Requires glibc >= 2.17 (Ubuntu 20.04+ / RHEL 8+); the CACTI + Ramulator
+#   binaries are rebuilt from source by 01_install.sh with static libstdc++.
 #
 # Env flags:
-#   FULL=1     Also regenerate Figure 11 data from simulator (adds ~5-10 min)
+#   FULL=1     Also regenerate Figure 11 data from simulator (adds ~30 min)
 #   PY=/path   Python interpreter (default: current env's `python`)
 
 set -euo pipefail
@@ -46,7 +47,7 @@ if [[ "${FULL:-0}" == "1" ]]; then
   ( cd "$HW_DIR" && bash sim/run_fig11_sim.sh )
 fi
 
-echo "[sim] Regenerating Table 10 workload-sensitivity data (~15-20 min)..."
+echo "[sim] Regenerating Table 10 workload-sensitivity data (~2 h)..."
 ( cd "$HW_DIR" && bash sim/run_table7_sim.sh )
 
 echo "[replot] Figure 11"

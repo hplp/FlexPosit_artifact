@@ -16,7 +16,7 @@
 #   fp8_e4m3  -> per-Linear FP8-E4M3 activation quantization via forward-pre hook
 #
 # Reference: expected/table6_act_quant.csv
-# Wallclock: ~1-1.5 h on 1x A40 (eval-only; reuses step 03 checkpoints).
+# Wallclock: ~0.5-1 h on 1x A40 (eval-only; reuses step 03 checkpoints).
 #
 # Prerequisite: run 02_headline_ppl.sh first (produces the checkpoints).
 
