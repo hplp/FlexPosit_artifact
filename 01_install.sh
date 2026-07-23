@@ -124,8 +124,6 @@ if [[ -d "$CACTI_DIR/src" ]]; then
   else
     echo "[cacti] WARN: build failed; keeping the bundled binary."
     echo "[cacti]       See build log: $CACTI_LOG"
-    echo "[cacti]       Last error lines:"
-    tail -n 5 "$CACTI_LOG" 2>/dev/null | sed 's/^/[cacti]         /'
   fi
 else
   echo "[cacti] No src/ directory found; keeping the bundled binary"
