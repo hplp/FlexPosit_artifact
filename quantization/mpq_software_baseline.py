@@ -67,9 +67,17 @@ def module_kind(name):
 
 
 @torch.no_grad()
-def quantize_pc_posit(W_fp, nsize, es=1, log2_min=-8, log2_max=9, device="cuda"):
-    """Per-channel PoT-scale SQNR-best Posit(nsize, es). CPU FP32 in/out."""
-    W = W_fp.to(device).float()
+def quantize_pc_posit(W_fp, nsize, es=1, log2_min=-8, log2_max=9, device="cuda", is_conv1d=False):
+    """Per-output-channel PoT-scale SQNR-best Posit(nsize, es). CPU FP32 in/out.
+
+    HF Conv1D stores weight as (Cin, Cout); we transpose to (Cout, Cin) so per-row
+    iteration is per-Cout, matching nn.Linear semantics, then transpose back.
+    """
+    W_in = W_fp.to(device).float()
+    if is_conv1d:
+        W = W_in.transpose(0, 1).contiguous()   # (Cout, Cin)
+    else:
+        W = W_in
     Cout, K = W.shape
     scales = torch.tensor(
         [2.0 ** i for i in range(log2_min, log2_max + 1)],
@@ -89,6 +97,8 @@ def quantize_pc_posit(W_fp, nsize, es=1, log2_min=-8, log2_max=9, device="cuda")
     for c in range(Cout):
         s = float(scales[best_s[c]].item())
         out[c] = posit_quantize(W[c] * s, nsize=nsize, es=es, scale=1.0) / s
+    if is_conv1d:
+        out = out.transpose(0, 1).contiguous()
     return out.detach().cpu()
 
 
@@ -207,7 +217,8 @@ def compute_fisher_diagonal(model_fp, tok, seqlen, n_calib):
     return grad_sq
 
 
-def fisher_sensitivity_per_region(layout, ref_sd, fisher_diag, b_low, b_high, es, device):
+def fisher_sensitivity_per_region(layout, ref_sd, fisher_diag, b_low, b_high, es, device, conv1d_names=None):
+    conv1d_names = conv1d_names or set()
     sens = {}
     for key, names in layout:
         s = 0.0
@@ -215,9 +226,10 @@ def fisher_sensitivity_per_region(layout, ref_sd, fisher_diag, b_low, b_high, es
             wkey = n + ".weight"
             if wkey not in ref_sd or wkey not in fisher_diag:
                 continue
+            is_c1d = n in conv1d_names
             w_fp = ref_sd[wkey].float()
-            w_low = quantize_pc_posit(w_fp, nsize=b_low, es=es, device=device)
-            w_high = quantize_pc_posit(w_fp, nsize=b_high, es=es, device=device)
+            w_low = quantize_pc_posit(w_fp, nsize=b_low, es=es, device=device, is_conv1d=is_c1d)
+            w_high = quantize_pc_posit(w_fp, nsize=b_high, es=es, device=device, is_conv1d=is_c1d)
             d_low_sq = (w_fp - w_low) ** 2
             d_high_sq = (w_fp - w_high) ** 2
             s += float((fisher_diag[wkey] * (d_low_sq - d_high_sq)).sum().item())
@@ -243,7 +255,8 @@ def ppl_probe_sensitivity_per_region(
                 print(f"  [warn] missing ref weight {wkey}", flush=True)
                 continue
             wq = quantize_pc_posit(
-                ref_sd[wkey].float(), nsize=b_high, es=es, device=m.weight.device
+                ref_sd[wkey].float(), nsize=b_high, es=es, device=m.weight.device,
+                is_conv1d=isinstance(m, modeling_utils.Conv1D),
             )
             m.weight.data = wq.to(m.weight.dtype).to(m.weight.device)
         ppl = eval_wikitext_ppl(model_q, tok, seqlen, use_fp16=use_fp16)
@@ -310,6 +323,11 @@ def main():
         ref_sd = {n: p.detach().cpu().to(torch.float16)
                   for n, p in model_fp.named_parameters() if n.endswith(".weight")}
 
+        # Capture which layers are HF Conv1D so per-Cout orientation can be
+        # preserved after model_fp is freed (needed for the Fisher path).
+        conv1d_names = {n for n, m in model_fp.named_modules()
+                        if isinstance(m, modeling_utils.Conv1D)}
+
         # Free FP model BEFORE the SQNR-search inner buffer is allocated, otherwise
         # the residual activations + grad-checkpointing buffers OOM on 7B + A100-40GB.
         del model_fp
@@ -319,7 +337,8 @@ def main():
         print(f"[Sensitivity] Fisher  {args.b_low}b -> {args.b_high}b ...", flush=True)
         t0 = time.time()
         sens = fisher_sensitivity_per_region(
-            layout, ref_sd, fisher_diag, args.b_low, args.b_high, args.es, device="cuda"
+            layout, ref_sd, fisher_diag, args.b_low, args.b_high, args.es, device="cuda",
+            conv1d_names=conv1d_names,
         )
         print(f"[Sensitivity] done ({time.time()-t0:.1f}s)", flush=True)
 
@@ -438,6 +457,7 @@ def main():
                     wq = quantize_pc_posit(
                         ref_sd[wkey].float(), nsize=args.b_high, es=args.es,
                         device=m.weight.device,
+                        is_conv1d=isinstance(m, modeling_utils.Conv1D),
                     )
                     m.weight.data = wq.to(m.weight.dtype).to(m.weight.device)
                 upgraded.append(nxt)

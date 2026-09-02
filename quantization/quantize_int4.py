@@ -31,14 +31,19 @@ def skip(name, m):
 
 
 @torch.no_grad()
-def int4_per_channel_range(W: torch.Tensor, nbits: int = 4):
-    """Per-output-row signed INT quantize: scale = qmax / amax(row)."""
+def int4_per_channel_range(W: torch.Tensor, nbits: int = 4, is_conv1d: bool = False):
+    """Per-output-channel signed INT quantize: scale = qmax / amax(row_over_Cin).
+
+    nn.Linear weight is (Cout, Cin) -> reduce dim=-1 (last).
+    HF Conv1D weight is (Cin, Cout) -> reduce dim=0 so the scale is still per-Cout.
+    """
     qmin = -(1 << (nbits - 1))
     qmax = (1 << (nbits - 1)) - 1
     dtype, dev = W.dtype, W.device
     W_f = W.detach().float()
-    amax = W_f.abs().amax(dim=-1, keepdim=True).clamp_min(EPS)          # [Cout, 1]
-    scale = qmax / amax                                                  # [Cout, 1]
+    reduce_dim = 0 if is_conv1d else -1
+    amax = W_f.abs().amax(dim=reduce_dim, keepdim=True).clamp_min(EPS)
+    scale = qmax / amax
     q = torch.clamp(torch.round(W_f * scale), qmin, qmax) / scale
     return q.to(dtype=dtype, device=dev)
 
@@ -87,9 +92,12 @@ def main():
             continue
         if mod.weight.dim() != 2:
             continue
-        mod.weight.data = int4_per_channel_range(mod.weight.data)
+        mod.weight.data = int4_per_channel_range(
+            mod.weight.data,
+            is_conv1d=isinstance(mod, modeling_utils.Conv1D),
+        )
         n_quantized += 1
-    print(f"[Quantize] INT4 (per-channel range) on {n_quantized} Linear/Conv1D layers", flush=True)
+    print(f"[Quantize] INT4 (per-output-channel range) on {n_quantized} Linear/Conv1D layers", flush=True)
 
     ppl = eval_wikitext2_ppl(model, tok, a.seqlen, a.dtype)
     print(f"[Result] wikitext2_ppl = {ppl:.4f}", flush=True)

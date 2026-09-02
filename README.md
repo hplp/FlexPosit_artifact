@@ -20,7 +20,7 @@ Each script writes its CSV to `results/` and ends with a `verify.py` diff agains
 ## Requirements
 
 - 1x NVIDIA GPU with ≥40 GB VRAM and compute capability 8.0–9.0 (A40, A6000, L40S, A100, RTX 6000 Ada, H100, H200). Blackwell (compute 10.0+) requires PyTorch 2.5+ with CUDA 12.4+; swap `requirements.txt` accordingly.
-- ~250 GB free disk
+- ~600 GB free disk
 - Miniforge/Miniconda; NVIDIA driver ≥520
 - HuggingFace token with access to `meta-llama/Llama-2-7b-hf`
 

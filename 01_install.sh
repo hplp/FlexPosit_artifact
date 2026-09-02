@@ -194,6 +194,17 @@ else
   echo "[ramulator] No src_build/ directory found; keeping the bundled binary"
 fi
 
+# --- qtorch_plus CUDA/JIT smoke test (per MICRO 2026 AE Reviewer A) ---
+# qtorch_plus's CUDA extensions JIT-compile on first use, so host toolchain
+# problems (missing nvcc, glibc mismatch, C++ ABI drift) otherwise only
+# surface hours later during step 03/06. Fail loudly here instead.
+echo
+echo "==========================================================="
+echo "qtorch_plus CUDA/JIT smoke test"
+echo "==========================================================="
+python -c "import torch; from qtorch_plus.quant import posit_quantize; posit_quantize(torch.randn(4).cuda(), nsize=4, es=1)"
+echo "[qtorch_plus] JIT compile + CUDA posit kernel OK"
+
 echo
 echo "==========================================================="
 echo "Install complete."

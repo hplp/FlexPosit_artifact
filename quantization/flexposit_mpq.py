@@ -1106,8 +1106,20 @@ def apply_windows_to_model(model,
         if key not in ref_sd:
             print(f"[Warn] Missing FP32 ref for {key}; skip layer {name}.")
             continue
-        fp32_w = ref_sd[key]
-        base_w_cpu = mod.weight.detach().float().cpu()
+
+        # Per-Cout orientation: HF Conv1D stores (Cin, Cout) — transpose both the
+        # FP32 reference and the stored weight so window indices [ws:we] walk
+        # along Cout for BOTH Conv1D and nn.Linear.
+        is_conv1d = isinstance(mod, modeling_utils.Conv1D)
+        fp32_w_stored = ref_sd[key]
+        base_w_stored_cpu = mod.weight.detach().float().cpu()
+        if is_conv1d:
+            fp32_w = fp32_w_stored.transpose(0, 1).contiguous()      # (Cout, Cin)
+            base_w_cpu = base_w_stored_cpu.transpose(0, 1).contiguous()
+        else:
+            fp32_w = fp32_w_stored
+            base_w_cpu = base_w_stored_cpu
+
         Q_full = base_w_cpu.clone()
         for (ws, we, _cw) in by_layer[name]:
             Q_win = quantize_window_cpu_from_fp32(fp32_w, nsize=nsize,
@@ -1115,13 +1127,21 @@ def apply_windows_to_model(model,
                                                   es_cands=es_cands,
                                                   sweep_scales=sweep_scales)
             Q_full[ws:we] = Q_win[ws:we]
+
+        if is_conv1d:
+            Q_write = Q_full.transpose(0, 1).contiguous()  # back to (Cin, Cout)
+        else:
+            Q_write = Q_full
+
         with torch.no_grad():
-            mod.weight.data = Q_full.to(mod.weight.device, dtype=mod.weight.dtype)
+            mod.weight.data = Q_write.to(mod.weight.device, dtype=mod.weight.dtype)
         upgraded[name] = {
             "n_windows": len(by_layer[name]),
             "windows": [(ws, we) for (ws, we, _cw) in by_layer[name]],
             "nsize": nsize,
             "shape": list(fp32_w.shape),
+            "module_class": type(mod).__name__,
+            "per_cout": True,
         }
     return upgraded
 

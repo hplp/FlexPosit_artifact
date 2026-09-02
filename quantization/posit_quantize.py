@@ -195,6 +195,24 @@ def is_quant_linear(mod: nn.Module):
         return True
     return False
 
+
+def _to_cout_first(mod: nn.Module, W: torch.Tensor) -> torch.Tensor:
+    """Return W arranged so dim 0 is Cout.
+
+    nn.Linear stores (Cout, Cin) — passed through.
+    HF Conv1D stores (Cin, Cout) — transposed so per-row iteration is per-Cout.
+    """
+    if isinstance(mod, modeling_utils.Conv1D):
+        return W.transpose(0, 1).contiguous()
+    return W
+
+
+def _from_cout_first(mod: nn.Module, q_w: torch.Tensor) -> torch.Tensor:
+    """Undo _to_cout_first: transpose back to storage layout for Conv1D."""
+    if isinstance(mod, modeling_utils.Conv1D):
+        return q_w.transpose(0, 1).contiguous()
+    return q_w
+
 def should_skip_layer(name: str, mod: nn.Module, skip_lm_head: bool, quantize_embeddings: bool):
     if skip_lm_head and (name == "lm_head" or name.endswith(".lm_head")):
         return True
@@ -1115,63 +1133,66 @@ def main():
                 continue
 
             # ---- baseline weight-only path: weight_format dispatch ----
+            # Per-channel search assumes dim 0 = Cout. HF Conv1D stores (Cin, Cout);
+            # transpose in and back out so scale/es search is per-output-channel.
+            W_in = _to_cout_first(mod, mod.weight)
             if args.weight_format == "posit4":
                 q_w, per_ch = per_channel_quantize_fixed_nsize_batched(
-                    mod.weight, nsize=4, es_cands=args.es_candidates,
+                    W_in, nsize=4, es_cands=args.es_candidates,
                     sweep_scales=sweep_scales, ch_batch=args.ch_batch
                 )
             elif args.weight_format == "posit5":
                 q_w, per_ch = per_channel_quantize_fixed_nsize_batched(
-                    mod.weight, nsize=5, es_cands=args.es_candidates,
+                    W_in, nsize=5, es_cands=args.es_candidates,
                     sweep_scales=sweep_scales, ch_batch=args.ch_batch
                 )
             elif args.weight_format == "bitmod4":
                 q_w, per_ch = per_channel_int4_grouped_sqnr_batched(
-                    mod.weight, sweep_scales=sweep_scales, ch_batch=args.ch_batch, search_metric=args.search_metric
+                    W_in, sweep_scales=sweep_scales, ch_batch=args.ch_batch, search_metric=args.search_metric
                 )
             elif args.weight_format == "bitmod4_g128":
                 q_w, per_ch = per_channel_gw_int4_sqnr_batched(
-                    mod.weight, sweep_scales=sweep_scales, ch_batch=args.ch_batch,
+                    W_in, sweep_scales=sweep_scales, ch_batch=args.ch_batch,
                     group_size=args.bitmod_group_size, search_metric=args.search_metric
                 )
             elif args.weight_format == "bitmod3":
                 q_w, per_ch = per_channel_int3_grouped_sqnr_batched(
-                    mod.weight, sweep_scales=sweep_scales, ch_batch=args.ch_batch, search_metric=args.search_metric
+                    W_in, sweep_scales=sweep_scales, ch_batch=args.ch_batch, search_metric=args.search_metric
                 )
             elif args.weight_format == "bitmod3_g128":
                 q_w, per_ch = per_channel_gw_int3_sqnr_batched(
-                    mod.weight, sweep_scales=sweep_scales, ch_batch=args.ch_batch,
+                    W_in, sweep_scales=sweep_scales, ch_batch=args.ch_batch,
                     group_size=args.bitmod_group_size, search_metric=args.search_metric
                 )
             elif args.weight_format == "mxfp4":
                 q_w, per_ch = per_channel_groupwise_mxfp4_e2m1_sqnr_batched(
-                    mod.weight, sweep_scales=sweep_scales, ch_batch=args.ch_batch,
+                    W_in, sweep_scales=sweep_scales, ch_batch=args.ch_batch,
                     group_size=32, search_metric=args.search_metric, format_label="mxfp4_g32",
                 )
             elif args.weight_format == "mxfp4_g128":
                 q_w, per_ch = per_channel_groupwise_mxfp4_e2m1_sqnr_batched(
-                    mod.weight, sweep_scales=sweep_scales, ch_batch=args.ch_batch,
+                    W_in, sweep_scales=sweep_scales, ch_batch=args.ch_batch,
                     group_size=args.bitmod_group_size, search_metric=args.search_metric,
                     format_label="mxfp4_g128",
                 )
             elif args.weight_format == "olive4":
                 q_w, per_ch = per_channel_olive4_batched(
-                    mod.weight, ch_batch=args.ch_batch,
+                    W_in, ch_batch=args.ch_batch,
                     w_low=args.olive_w_low, w_up=args.olive_w_up,
                 )
             elif args.weight_format == "mix_bitmod4_posit4":
                 q_w, per_ch = per_channel_mix_int4_positN_sqnr_batched(
-                    mod.weight, posit_nsize=4, posit_label="posit4",
+                    W_in, posit_nsize=4, posit_label="posit4",
                     es_cands=args.es_candidates,
                     sweep_scales=sweep_scales, ch_batch=args.ch_batch
                 )
             else:
                 q_w, per_ch = per_channel_mix_int4_positN_sqnr_batched(
-                    mod.weight, posit_nsize=5, posit_label="posit5",
+                    W_in, posit_nsize=5, posit_label="posit5",
                     es_cands=args.es_candidates,
                     sweep_scales=sweep_scales, ch_batch=args.ch_batch
                 )
-            mod.weight.data = q_w
+            mod.weight.data = _from_cout_first(mod, q_w)
 
             if args.use_act_quant and not getattr(mod, "_act_quant_hooked", False):
                 mod.register_forward_pre_hook(act_hook)

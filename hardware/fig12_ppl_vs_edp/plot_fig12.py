@@ -76,13 +76,24 @@ def main():
         Line2D([], [], marker="^", color="none", markerfacecolor=C_BIT, markeredgecolor="k", markersize=11, label="BitMoD"),
         Line2D([], [], marker="s", color="none", markerfacecolor=C_O88, markeredgecolor="k", markersize=11, label="OliVe (a8w8)"),
         Line2D([], [], marker="s", color="none", markerfacecolor=C_O44, markeredgecolor="k", markersize=11, label="OliVe (a4w4)"),
-        Line2D([], [], marker="o", color="none", markerfacecolor=cm.Greens(0.62), markeredgecolor="k", markersize=10, label="FlexPosit (4.1-5.0b, step=0.1b)"),
+        Line2D([], [], marker="o", color="none", markerfacecolor=cm.Greens(0.62), markeredgecolor="k", markersize=10, label="FlexPosit (4.1-5.0 b)"),
         Line2D([], [], ls="--", color=C_SERIES, lw=1.4, label="FlexPosit Series"),
     ]
-    fig.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, 1.06), ncol=5,
-               frameon=True, fancybox=False, edgecolor="#CCCCCC", framealpha=0.95,
-               handletextpad=0.4, columnspacing=1.1, fontsize=10)
-    fig.subplots_adjust(top=0.86, wspace=0.28, bottom=0.20)
+    fig.legend(
+        handles=handles,
+        loc="upper center",
+        bbox_to_anchor=(0.5, 1.015),
+        ncol=5,
+        frameon=True,
+        fancybox=False,
+        edgecolor="#CCCCCC",
+        framealpha=0.95,
+        handletextpad=0.45,
+        columnspacing=1.0,
+        fontsize=12,
+    )
+
+    fig.subplots_adjust(top=0.87, wspace=0.28, bottom=0.20)
 
     out = os.path.join(HERE, "fig12_ppl_vs_edp.png")
     fig.savefig(out, dpi=300, bbox_inches="tight", facecolor="white")
