@@ -1,6 +1,22 @@
 # FlexPosit MICRO 2026 Artifact
 
+
+<p align="center">
+  <img src="assets/artifacts_available_v1_1.png" height="100">
+  <img src="assets/artifacts_evaluated_functional_v1_1.png" height="100">
+  <img src="assets/results_reproduced_v1_1.png" height="100">
+</p>
+
+
+FlexPosit received all three MICRO 2026 artifact badges:
+**Artifacts Available**, **Artifacts Evaluated — Functional**, and **Results Reproduced**.
+
+
 See the paper's Artifact Appendix for the full description. This README is a quick reference.
+
+
+For the actively maintained FlexPosit framework and general use, see:
+https://github.com/hplp/FlexPosit
 
 ## Reproduce
 
@@ -26,6 +42,22 @@ Each script writes its CSV to `results/` and ends with a `verify.py` diff agains
 
 If Meta approval is pending, pass `SKIP_LLAMA2=1` to reproduce the other 8 models.
 On a 24 GB card, pass `SKIP_QWEN14B=1` to skip the 14B model.
+
+## Paper and citation
+
+Preprint: https://arxiv.org/abs/2609.04724
+
+```bibtex
+@misc{gao2026flexposit,
+  title         = {FlexPosit: Tunable Fractional Precision for LLM Inference Accelerators},
+  author        = {Gao, Yimin and Dai, Liangtao and Yin, Jun and Guo, Xinfei and Stan, Mircea},
+  year          = {2026},
+  eprint        = {2609.04724},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.AR},
+  doi           = {10.48550/arXiv.2609.04724}
+}
+```
 
 ## Contact
 
